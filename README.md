@@ -1,12 +1,12 @@
 # Clip
 
-[English](#english) · [Download v0.0.1](https://github.com/nsdtkm/clip/releases/tag/v0.0.1)
+[English](#english) · [Download v0.0.2](https://github.com/nsdtkm/clip/releases/tag/v0.0.2)
 
 Apple Silicon向けの軽量なクリップボード履歴アプリです。Swift / AppKitとmacOS標準のSQLiteだけを使用します。macOS 13以降に対応します。
 
 ## ダウンロード・インストール
 
-[Releases](https://github.com/nsdtkm/clip/releases/tag/v0.0.1)から`Clip-v0.0.1-arm64.zip`をダウンロードし、展開した`Clip.app`をApplicationsフォルダーに移動して起動してください。Apple Silicon / macOS 13以降向けです。
+[Releases](https://github.com/nsdtkm/clip/releases/tag/v0.0.2)から`Clip-v0.0.2-arm64.zip`をダウンロードし、展開した`Clip.app`をApplicationsフォルダーに移動して起動してください。Apple Silicon / macOS 13以降向けです。
 
 このリリースはアドホック署名のみで、Developer ID署名・Appleの公証はありません。初回起動がブロックされた場合、配布元を信頼できることを確認したうえで、システム設定 → プライバシーとセキュリティ →「このまま開く」で許可してください。管理されたMacでは許可できない場合があります。[Appleの案内](https://support.apple.com/102445)
 
@@ -32,9 +32,11 @@ open dist/Clip.app
 
 メニューバーのクリップボードアイコンから、履歴表示、記録の一時停止、設定、全削除、終了を選べます。履歴で選択した項目は`Backspace`（Macの`delete`キー）で削除します。キーの長押しでは連続削除しません。
 
-履歴ウィンドウは角丸・背景70%透過（不透明度30%）の枠なし表示です。macOS標準の背景ぼかしに、半径3のGaussian Blurを追加しています。文字・画像には透過やぼかしを適用しません。タイトルバー、閉じる／最小化ボタン、説明文は表示しません。`Esc`またはウィンドウ外のクリックで閉じます。
+履歴ウィンドウは角丸・背景30%透過（不透明度70%）の枠なし表示です。macOS標準の背景ぼかしに、半径3のGaussian Blurを追加しています。文字・画像には透過やぼかしを適用しません。タイトルバー、閉じる／最小化ボタン、説明文は表示しません。`Esc`またはウィンドウ外のクリックで閉じます。
 
 設定のホットキーボタンをクリックし、Command / Control / Optionのいずれかを含むキーの組み合わせを入力すると変更できます（Shiftも併用可能）。OS予約や他アプリとの競合で登録できない場合は、以前の設定を維持します。
+
+ウィンドウ幅は560pt、テキスト行は44pt、画像行は88ptです。画像は最大160 × 72ptの枠内に縦横比を維持して表示し、選択ハイライトは角丸です。
 
 ## 保存と制限
 
@@ -87,7 +89,7 @@ Clip is a lightweight menu bar clipboard history app for Apple Silicon Macs runn
 
 ### Download and install
 
-1. Download **Clip-v0.0.1-arm64.zip** from [GitHub Releases](https://github.com/nsdtkm/clip/releases/tag/v0.0.1).
+1. Download **Clip-v0.0.2-arm64.zip** from [GitHub Releases](https://github.com/nsdtkm/clip/releases/tag/v0.0.2).
 2. Extract the ZIP and move **Clip.app** to **Applications**. Quit any existing instance before replacing it.
 3. Open Clip. Its clipboard icon appears in the menu bar; it does not appear in the Dock.
 4. Allow Clip in **System Settings → Privacy & Security → Accessibility** to enable automatic pasting.
@@ -106,7 +108,9 @@ If macOS requests clipboard access, allow it to record history. OS permission di
 - Use the menu bar to pause/resume recording, clear history, open Settings, or quit.
 - In **Settings**, click the shortcut button and enter a combination containing Command, Control, or Option; Shift can also be included. Enable **Launch at Login** if desired.
 
-The history panel is borderless, with rounded corners and a 70% transparent background. A radius-3 Gaussian blur is added to the native background material. History text and images stay sharp.
+The history panel is borderless, with rounded corners and a 30% transparent background. A radius-3 Gaussian blur is added to the native background material. History text and images stay sharp.
+
+The panel is 560pt wide, with compact 44pt text rows and larger 88pt image rows. Image previews fit within 160 × 72pt while preserving their aspect ratio. Selection highlights have rounded corners.
 
 ### Storage and limits
 

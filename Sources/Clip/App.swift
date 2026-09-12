@@ -4,6 +4,15 @@ import ServiceManagement
 import ImageIO
 import CoreImage
 
+final class HistoryRowView: NSTableRowView {
+    override func drawSelection(in dirtyRect: NSRect) {
+        guard selectionHighlightStyle != .none else { return }
+        let highlight = bounds.insetBy(dx: 4, dy: 2)
+        NSColor.selectedContentBackgroundColor.setFill()
+        NSBezierPath(roundedRect: highlight, xRadius: 8, yRadius: 8).fill()
+    }
+}
+
 final class HistoryTable: NSTableView {
     var deleteSelection: (() -> Void)?
     var choose: (() -> Void)?
@@ -74,7 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
         timer?.tolerance = 0.1
     }
     private func makePanel() {
-        panel = HistoryPanel(contentRect: NSRect(x: 0, y: 0, width: 440, height: 400), styleMask: [.borderless], backing: .buffered, defer: false)
+        panel = HistoryPanel(contentRect: NSRect(x: 0, y: 0, width: 560, height: 400), styleMask: [.borderless], backing: .buffered, defer: false)
         panel.setAccessibilityLabel("Clipboard History")
         panel.isOpaque = false
         panel.backgroundColor = .clear
@@ -96,7 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
         background.material = .popover
         background.blendingMode = .behindWindow
         background.state = .active
-        background.alphaValue = 0.3
+        background.alphaValue = 0.7
         background.wantsLayer = true
         // AppKit controls the material's backdrop blur; this is an additional blur.
         if let blur = CIFilter(name: "CIGaussianBlur") {
@@ -117,9 +126,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
         table.deleteSelection = { [weak self] in self?.deleteSelected() }
         table.choose = { [weak self] in self?.pasteSelected() }
         table.dismiss = { [weak self] in self?.dismiss() }
-        table.tableColumns.first?.width = 408
+        table.tableColumns.first?.width = scroll.contentSize.width
+        table.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         table.headerView = nil
-        table.rowHeight = 56
+        table.rowHeight = 44
+        table.intercellSpacing = NSSize(width: 0, height: 0)
         table.delegate = self
         table.dataSource = self
         table.target = self
@@ -196,7 +207,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
                 var images: [String: NSImage] = [:]
                 for item in result where item.kind == "image" {
                     if let source = CGImageSourceCreateWithURL(store.file(item.id) as CFURL, nil),
-                       let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceThumbnailMaxPixelSize: 96, kCGImageSourceCreateThumbnailWithTransform: true] as CFDictionary) {
+                       let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceThumbnailMaxPixelSize: 320, kCGImageSourceCreateThumbnailWithTransform: true] as CFDictionary) {
                         images[item.id] = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
                     }
                 }
@@ -210,18 +221,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSTableViewDataSource,
         }
     }
     func numberOfRows(in tableView: NSTableView) -> Int { items.count }
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        items[row].kind == "image" ? 88 : 44
+    }
+    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+        HistoryRowView()
+    }
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         let item = items[row]
-        let cell = NSTableCellView(frame: NSRect(x: 0, y: 0, width: 400, height: 56))
-        let label = NSTextField(labelWithString: item.kind == "image" ? "" : item.preview)
-        label.lineBreakMode = .byTruncatingTail
-        label.frame = NSRect(x: item.kind == "image" ? 72 : 12, y: 18, width: item.kind == "image" ? 300 : 380, height: 20)
-        cell.addSubview(label)
+        let width = tableColumn?.width ?? tableView.bounds.width
+        let height: CGFloat = item.kind == "image" ? 88 : 44
+        let cell = NSTableCellView(frame: NSRect(x: 0, y: 0, width: width, height: height))
         if item.kind == "image" {
-            let image = NSImageView(frame: NSRect(x: 8, y: 4, width: 56, height: 48))
+            let image = NSImageView(frame: NSRect(x: 12, y: 8, width: 160, height: 72))
             image.setAccessibilityLabel("Image")
-            image.image = thumbnails[item.id]; image.imageScaling = .scaleProportionallyDown
+            image.image = thumbnails[item.id]
+            image.imageScaling = .scaleProportionallyDown
+            image.imageAlignment = .alignLeft
             cell.addSubview(image)
+        } else {
+            let label = NSTextField(labelWithString: item.preview)
+            label.lineBreakMode = .byTruncatingTail
+            label.frame = NSRect(x: 12, y: 12, width: max(0, width - 24), height: 20)
+            label.autoresizingMask = [.width]
+            cell.addSubview(label)
         }
         return cell
     }
